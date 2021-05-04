@@ -1,10 +1,7 @@
-use ggez::{
-    conf, event,
-    graphics::{self, DrawParam, Image},
-    nalgebra, Context, ContextBuilder, GameResult,
-};
+use ggez::{conf, event, graphics, input, nalgebra, Context, ContextBuilder, GameResult};
 use specs::{
     Builder, Component, Entity, Join, ReadStorage, RunNow, System, VecStorage, World, WorldExt,
+    Write, WriteStorage,
 };
 use std::path;
 
@@ -120,11 +117,12 @@ impl<'a> System<'a> for RenderingSystem<'a> {
         rendering_data.sort_by_key(|&k| k.0.z);
 
         for (position, renderable) in rendering_data.iter() {
-            let image = Image::new(self.context, renderable.path.clone()).expect("Image error");
+            let image =
+                graphics::Image::new(self.context, renderable.path.clone()).expect("Image error");
             let x = position.x as f32 * TILE_WIDTH;
             let y = position.y as f32 * TILE_WIDTH;
 
-            let draw_params = DrawParam::new().dest(nalgebra::Point2::new(x, y));
+            let draw_params = graphics::DrawParam::new().dest(nalgebra::Point2::new(x, y));
             graphics::draw(self.context, &image, draw_params).expect("Draw error");
         }
 
@@ -132,12 +130,60 @@ impl<'a> System<'a> for RenderingSystem<'a> {
     }
 }
 
+struct InputSystem {}
+
+impl<'a> System<'a> for InputSystem {
+    type SystemData = (
+        Write<'a, InputQueue>,
+        WriteStorage<'a, Position>,
+        ReadStorage<'a, Player>,
+    );
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (mut input_queue, mut positions, players) = data;
+
+        for (position, _player) in (&mut positions, &players).join() {
+            if let Some(key) = input_queue.keys_pressed.pop() {
+                match key {
+                    event::KeyCode::Up => position.y -= 1,
+                    event::KeyCode::Down => position.y += 1,
+                    event::KeyCode::Left => position.x -= 1,
+                    event::KeyCode::Right => position.x += 1,
+                    _ => (),
+                }
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+struct InputQueue {
+    keys_pressed: Vec<event::KeyCode>,
+}
+
+fn register_resources(world: &mut World) {
+    world.insert(InputQueue::default());
+}
+
 struct Game {
     world: World,
 }
 
 impl event::EventHandler for Game {
-    fn update(&mut self, context: &mut Context) -> GameResult {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: event::KeyCode,
+        _keymods: event::KeyMods,
+        _repeat: bool,
+    ) {
+        let mut input_queue = self.world.write_resource::<InputQueue>();
+        input_queue.keys_pressed.push(keycode);
+    }
+
+    fn update(&mut self, _context: &mut Context) -> GameResult {
+        let mut input_system = InputSystem {};
+        input_system.run_now(&self.world);
         Ok(())
         // todo!()
     }
@@ -210,6 +256,7 @@ fn initialize_level(world: &mut World) {
 fn main() -> GameResult {
     let mut world = World::new();
     register_components(&mut world);
+    register_resources(&mut world);
     initialize_level(&mut world);
 
     let context_builder = ContextBuilder::new("rust_sokoban", "zenoplex")
