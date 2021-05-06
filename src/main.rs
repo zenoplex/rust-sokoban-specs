@@ -203,7 +203,8 @@ impl<'a> System<'a> for InputSystem {
                     println!("pos to search: {:?}", &pos);
 
                     match mov.get(&pos) {
-                        Some(id) => to_move.push((key, id.clone())),
+                        // id.clone() maybe better?
+                        Some(id) => to_move.push((key, *id)),
                         None => match immov.get(&pos) {
                             Some(_id) => to_move.clear(),
                             // if there are no related immovable exit loop
