@@ -11,7 +11,7 @@ mod systems;
 use crate::components::register_components;
 use crate::map::load_map;
 use crate::resources::{register_resources, InputQueue};
-use crate::systems::{InputSystem, RenderingSystem};
+use crate::systems::{input_system::InputSystem, rendering_system::RenderingSystem};
 use std::path;
 
 struct Game {
