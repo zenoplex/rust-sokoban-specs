@@ -23,10 +23,14 @@ impl<'a> System<'a> for GameplayStateSystem {
             .map(|t| ((t.0.x, t.0.y), t.1))
             .collect();
 
-        for (_box_spot, position) in (&box_spots, &positions).join() {
-            if boxes_by_position.contains_key(&(position.x, position.y)) {
-                // We don't set GameplayState::Won because there could be multiple boxes
-                // We could keep track of box count / map
+        for (box_spot, position) in (&box_spots, &positions).join() {
+            if let Some(the_box) = boxes_by_position.get(&(position.x, position.y)) {
+                if the_box.color == box_spot.color {
+                    // We don't set GameplayState::Won because there could be multiple boxes
+                    // We could keep track of box count / map
+                } else {
+                    return;
+                }
             } else {
                 gameplay.state = GameplayState::Playing;
                 return;

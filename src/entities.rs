@@ -23,26 +23,26 @@ pub fn create_floor(world: &mut World, position: Position) -> Entity {
         .build()
 }
 
-pub fn create_box(world: &mut World, position: Position) -> Entity {
+pub fn create_box(world: &mut World, position: Position, color: BoxColor) -> Entity {
     world
         .create_entity()
         .with(Position { z: 10, ..position })
         .with(Renderable {
-            path: String::from("/images/box.png"),
+            path: format!("/images/box_{}.png", color),
         })
-        .with(Box {})
+        .with(Box { color })
         .with(Movable {})
         .build()
 }
 
-pub fn create_box_spot(world: &mut World, position: Position) -> Entity {
+pub fn create_box_spot(world: &mut World, position: Position, color: BoxColor) -> Entity {
     world
         .create_entity()
         .with(Position { z: 10, ..position })
         .with(Renderable {
-            path: String::from("/images/box_spot.png"),
+            path: format!("/images/box_spot_{}.png", color),
         })
-        .with(BoxSpot {})
+        .with(BoxSpot { color })
         .build()
 }
 
