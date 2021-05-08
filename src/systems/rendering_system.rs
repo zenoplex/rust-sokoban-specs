@@ -1,17 +1,24 @@
-use crate::components::*;
 use crate::constants::*;
-use ggez::{graphics, nalgebra, Context};
-use specs::{Join, ReadStorage, System};
+use crate::{components::*, resources::Gameplay};
+use ggez::{
+    graphics::{self, Color},
+    nalgebra, Context,
+};
+use specs::{Join, Read, ReadStorage, System};
 
 pub struct RenderingSystem<'a> {
     pub context: &'a mut Context,
 }
 
 impl<'a> System<'a> for RenderingSystem<'a> {
-    type SystemData = (ReadStorage<'a, Position>, ReadStorage<'a, Renderable>);
+    type SystemData = (
+        Read<'a, Gameplay>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Renderable>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (positions, renderables) = data;
+        let (gameplay, positions, renderables) = data;
 
         graphics::clear(self.context, graphics::Color::new(0.95, 0.95, 0.95, 1.0));
 
@@ -29,6 +36,27 @@ impl<'a> System<'a> for RenderingSystem<'a> {
             graphics::draw(self.context, &image, draw_params).expect("Draw error");
         }
 
+        self.draw_text(&gameplay.state.to_string(), 525.0, 80.0);
+        self.draw_text(&gameplay.moves_count.to_string(), 525.0, 100.0);
+
         graphics::present(self.context).expect("Render error");
+    }
+}
+
+impl RenderingSystem<'_> {
+    pub fn draw_text(&mut self, text_string: &str, x: f32, y: f32) {
+        let text = graphics::Text::new(text_string);
+        let destination = nalgebra::Point2::new(x, y);
+        let color = Some(Color::new(0.0, 0.0, 0.0, 1.0));
+        let dimentions = nalgebra::Point2::new(0.0, 20.0);
+
+        graphics::queue_text(self.context, &text, dimentions, color);
+        graphics::draw_queued_text(
+            self.context,
+            graphics::DrawParam::new().dest(destination),
+            None,
+            graphics::FilterMode::Linear,
+        )
+        .expect("Draw error");
     }
 }

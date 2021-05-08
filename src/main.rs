@@ -11,7 +11,7 @@ mod systems;
 use crate::components::register_components;
 use crate::map::load_map;
 use crate::resources::{register_resources, InputQueue};
-use crate::systems::{input_system::InputSystem, rendering_system::RenderingSystem};
+use crate::systems::{GameplayStateSystem, InputSystem, RenderingSystem};
 use std::path;
 
 struct Game {
@@ -33,8 +33,11 @@ impl event::EventHandler for Game {
     fn update(&mut self, _context: &mut Context) -> GameResult {
         let mut input_system = InputSystem {};
         input_system.run_now(&self.world);
+
+        let mut gameplay_state_system = GameplayStateSystem {};
+        gameplay_state_system.run_now(&self.world);
+
         Ok(())
-        // todo!()
     }
 
     fn draw(&mut self, context: &mut Context) -> GameResult {
