@@ -28,7 +28,7 @@ impl<'a> System<'a> for RenderingSystem<'a> {
 
         for (position, renderable) in rendering_data.iter() {
             let image =
-                graphics::Image::new(self.context, renderable.path.clone()).expect("Image error");
+                graphics::Image::new(self.context, renderable.path(0)).expect("Image error");
             let x = position.x as f32 * TILE_WIDTH;
             let y = position.y as f32 * TILE_WIDTH;
 
