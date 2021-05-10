@@ -1,7 +1,9 @@
-use crate::constants::*;
+use std::time::Duration;
+
 use crate::{components::*, resources::Gameplay};
+use crate::{constants::*, resources::Time};
 use ggez::{
-    graphics::{self, Color},
+    graphics::{self, Color, Image},
     nalgebra, Context,
 };
 use specs::{Join, Read, ReadStorage, System};
@@ -13,12 +15,13 @@ pub struct RenderingSystem<'a> {
 impl<'a> System<'a> for RenderingSystem<'a> {
     type SystemData = (
         Read<'a, Gameplay>,
+        Read<'a, Time>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Renderable>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (gameplay, positions, renderables) = data;
+        let (gameplay, time, positions, renderables) = data;
 
         graphics::clear(self.context, graphics::Color::new(0.95, 0.95, 0.95, 1.0));
 
@@ -27,8 +30,7 @@ impl<'a> System<'a> for RenderingSystem<'a> {
         rendering_data.sort_by_key(|&k| k.0.z);
 
         for (position, renderable) in rendering_data.iter() {
-            let image =
-                graphics::Image::new(self.context, renderable.path(0)).expect("Image error");
+            let image = self.get_image(&renderable, time.delta);
             let x = position.x as f32 * TILE_WIDTH;
             let y = position.y as f32 * TILE_WIDTH;
 
@@ -58,5 +60,15 @@ impl RenderingSystem<'_> {
             graphics::FilterMode::Linear,
         )
         .expect("Draw error");
+    }
+
+    pub fn get_image(&mut self, renderable: &Renderable, delta: Duration) -> Image {
+        let path_index = match renderable.kind() {
+            RenderableKind::Static => 0,
+            RenderableKind::Animated => ((delta.as_millis() % 1000) / 250) as usize,
+        };
+
+        let image_path = renderable.path(path_index);
+        Image::new(self.context, image_path).expect("Image Error")
     }
 }

@@ -2,6 +2,7 @@ use ggez::event;
 use specs::World;
 use std::fmt;
 use std::fmt::Display;
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct InputQueue {
@@ -34,7 +35,13 @@ pub struct Gameplay {
     pub moves_count: u32,
 }
 
+#[derive(Default)]
+pub struct Time {
+    pub delta: Duration,
+}
+
 pub fn register_resources(world: &mut World) {
     world.insert(InputQueue::default());
     world.insert(Gameplay::default());
+    world.insert(Time::default());
 }

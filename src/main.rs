@@ -1,4 +1,4 @@
-use ggez::{conf, event, Context, ContextBuilder, GameResult};
+use ggez::{conf, event, timer, Context, ContextBuilder, GameResult};
 use specs::{RunNow, World, WorldExt};
 
 mod components;
@@ -10,7 +10,7 @@ mod systems;
 
 use crate::components::register_components;
 use crate::map::load_map;
-use crate::resources::{register_resources, InputQueue};
+use crate::resources::{register_resources, InputQueue, Time};
 use crate::systems::{GameplayStateSystem, InputSystem, RenderingSystem};
 use std::path;
 
@@ -30,12 +30,15 @@ impl event::EventHandler for Game {
         input_queue.keys_pressed.push(keycode);
     }
 
-    fn update(&mut self, _context: &mut Context) -> GameResult {
+    fn update(&mut self, context: &mut Context) -> GameResult {
         let mut input_system = InputSystem {};
         input_system.run_now(&self.world);
 
         let mut gameplay_state_system = GameplayStateSystem {};
         gameplay_state_system.run_now(&self.world);
+
+        let mut time = self.world.write_resource::<Time>();
+        time.delta += timer::delta(context);
 
         Ok(())
     }
