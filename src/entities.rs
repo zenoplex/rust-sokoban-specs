@@ -23,7 +23,10 @@ pub fn create_box(world: &mut World, position: Position, color: BoxColor) -> Ent
     world
         .create_entity()
         .with(Position { z: 10, ..position })
-        .with(Renderable::new_static(format!("/images/box_{}.png", color)))
+        .with(Renderable::new_animated(vec![
+            format!("/images/box_{}_1.png", color),
+            format!("/images/box_{}_2.png", color),
+        ]))
         .with(Box { color })
         .with(Movable {})
         .build()
