@@ -1,9 +1,11 @@
 use ggez::{conf, event, timer, Context, ContextBuilder, GameResult};
 use specs::{RunNow, World, WorldExt};
+use systems::EventSystem;
 
 mod components;
 mod constants;
 mod entities;
+mod events;
 mod map;
 mod resources;
 mod systems;
@@ -39,6 +41,9 @@ impl event::EventHandler for Game {
 
         let mut time = self.world.write_resource::<Time>();
         time.delta += timer::delta(context);
+
+        let mut event_system = EventSystem {};
+        event_system.run_now(&self.world);
 
         Ok(())
     }
