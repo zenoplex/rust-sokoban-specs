@@ -4,7 +4,7 @@ use crate::{components::*, resources::Gameplay};
 use crate::{constants::*, resources::Time};
 use ggez::{
     graphics::{self, Color, Image},
-    nalgebra, Context,
+    nalgebra, timer, Context,
 };
 use specs::{Join, Read, ReadStorage, System};
 
@@ -40,6 +40,10 @@ impl<'a> System<'a> for RenderingSystem<'a> {
 
         self.draw_text(&gameplay.state.to_string(), 525.0, 80.0);
         self.draw_text(&gameplay.moves_count.to_string(), 525.0, 100.0);
+
+        // fps meter
+        let fps = format!("fps: {:.0}", timer::fps(self.context));
+        self.draw_text(&fps, 525.0, 120.0);
 
         graphics::present(self.context).expect("Render error");
     }
