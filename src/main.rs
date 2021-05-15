@@ -1,7 +1,9 @@
+use audio::initialize_sounds;
 use ggez::{conf, event, timer, Context, ContextBuilder, GameResult};
 use specs::{RunNow, World, WorldExt};
 use systems::EventSystem;
 
+mod audio;
 mod components;
 mod constants;
 mod entities;
@@ -61,7 +63,7 @@ fn initialize_level(world: &mut World) {
     W W W . . . . W
     W . . . BB . . W
     W . . RB . . . W 
-    W . P . . . . W
+    W . P . . W . W
     W . . . . RS . W
     W . . BS . . . W
     W . . . . . . W
@@ -83,6 +85,8 @@ fn main() -> GameResult {
         .add_resource_path(path::PathBuf::from("./resources"));
 
     let (mut context, mut event_loop) = context_builder.build()?;
+    initialize_sounds(&mut world, &mut context);
+
     let game = &mut Game { world };
     event::run(&mut context, &mut event_loop, game)
 }

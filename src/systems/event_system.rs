@@ -1,4 +1,5 @@
 use crate::{
+    audio::AudioStore,
     components::*,
     events::{BoxPlacedOnSpot, EntityMoved, Event},
     resources::EventQueue,
@@ -11,6 +12,7 @@ pub struct EventSystem {}
 impl<'a> System<'a> for EventSystem {
     type SystemData = (
         Write<'a, EventQueue>,
+        Write<'a, AudioStore>,
         Entities<'a>,
         ReadStorage<'a, Box>,
         ReadStorage<'a, BoxSpot>,
@@ -20,7 +22,7 @@ impl<'a> System<'a> for EventSystem {
     fn run(&mut self, data: Self::SystemData) {
         let mut new_events = Vec::new();
 
-        let (mut event_queue, entities, boxes, box_spots, positions) = data;
+        let (mut event_queue, mut audio_store, entities, boxes, box_spots, positions) = data;
 
         for event in event_queue.events.drain(..) {
             println!("New Event: {:?}", event);
@@ -32,6 +34,7 @@ impl<'a> System<'a> for EventSystem {
                     } else {
                         "incorrect"
                     };
+                    audio_store.play(sound);
                 }
 
                 Event::EntityMoved(EntityMoved { id }) => {
@@ -55,7 +58,7 @@ impl<'a> System<'a> for EventSystem {
                 }
 
                 Event::PlayerHitObstacle => {
-                    // play "wall" sound
+                    audio_store.play("wall");
                 }
             }
         }
