@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 ggez = "0.5.1"
+itertools = "0.10.0"
 specs = { version = "0.16.1", features = ["specs-derive"] }
