@@ -1,4 +1,4 @@
-use audio::SoundSource;
+use ggez::audio::SoundSource;
 use ggez::{audio, Context};
 use specs::{World, WorldExt};
 use std::collections::HashMap;
